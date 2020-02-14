@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://kasource.org/schema/spring-integration-nats"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:integration="http://www.springframework.org/schema/integration"
+            targetNamespace="http://kasource.org/schema/spring-integration-nats"
+            elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/integration"
+                schemaLocation="https://www.springframework.org/schema/integration/spring-integration-5.2.xsd"/>
+
+    <xsd:element name="inbound-channel-adapter">
+        <xsd:annotation>
+            <xsd:documentation>
+                This element configures NATS inbound channel adapter
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:attributeGroup ref="integration:channelAdapterAttributes"/>
+            <xsd:attribute name="error-channel" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Error message channel
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="request-payload-type" type="xsd:string" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Class name of the payload type.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="subject" type="xsd:string" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        NATS subject to listen to.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="queue-name" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Name of NATS queue (consumer group) to listen to.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="consumer-manager" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Bean name of the NatsConsumerManager to use. Will be looked up in the ApplicationContext if not set.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="inbound-gateway">
+        <xsd:annotation>
+            <xsd:documentation>
+                This element configures NATS inbound gateway
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:attributeGroup ref="integration:smartLifeCycleAttributeGroup"/>
+            <xsd:attribute name="id" type="xsd:string"/>
+            <xsd:attribute name="request-channel" type="xsd:string" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Incoming message channel
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="request-payload-type" type="xsd:string" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Class name of the payload type.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="reply-channel" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Incoming message channel
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="request-timeout" type="xsd:long" default="2000">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Timeout in millis waiting for a reply. If not set no timeout is used.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="error-channel" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Error message channel, mutually exclusive to error-subject. If error-channel is set it will take precedence.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="subject" type="xsd:string" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        NATS subject to listen to
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="error-subject" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Subject prefix to send errors to, mutually exclusive to error-channel. If error-channel is set it will take precedence.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="queue-name" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Name of NATS queue (consumer group) to listen to.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="template" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Bean name of the org.kasource.spring.nats.NatsTemplateImpl to use. Will be looked up in the
+                        ApplicationContext if not set.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="consumer-manager" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Bean name of the NatsConsumerManager to use. Will be looked up in the ApplicationContext if not set.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="task-executor" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Bean name of the ThreadPoolTaskExecutor to use, if not provided the default will be used.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="outbound-channel-adapter">
+        <xsd:annotation>
+            <xsd:documentation>
+                This element configures NATS outbound channel adapter
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:choice minOccurs="0" maxOccurs="2">
+                <xsd:element ref="integration:poller" minOccurs="0"/>
+                <xsd:element name="request-handler-advice-chain" type="integration:handlerAdviceChainType" minOccurs="0"/>
+            </xsd:choice>
+            <xsd:attributeGroup ref="integration:channelAdapterAttributes"/>
+            <xsd:attribute name="subject" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        NATS subject to send to. Mutually exclusive to subject-expression. This attribute will take precedence of both are set.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="subject-expression" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Expression for NATS subject to send to. Mutually exclusive to subject, which will take precedence of both are set.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="template" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Bean name of the org.kasource.spring.nats.NatsTemplateImpl to use. Will be looked up in the
+                        ApplicationContext if not set.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="outbound-gateway">
+        <xsd:annotation>
+            <xsd:documentation>
+                This element configures NATS outbound gateway
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:choice minOccurs="0" maxOccurs="3">
+                <xsd:element ref="integration:poller" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="transactional" type="integration:transactionalType" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="request-handler-advice-chain" type="integration:handlerAdviceChainType"
+                             minOccurs="0" maxOccurs="1" />
+            </xsd:choice>
+            <xsd:attribute name="id" type="xsd:string"/>
+            <xsd:attributeGroup ref="integration:smartLifeCycleAttributeGroup"/>
+
+            <xsd:attribute name="request-channel" type="xsd:string" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Request message channel
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="reply-channel" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Reply message channel, if not set there must be a replyChannel header present in the request message.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="request-timeout" type="xsd:long" default="2000">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Timeout in millis waiting for a reply. If not set no timeout is used.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="reply-payload-type" type="xsd:string" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Class name of the reply payload type.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="subject" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        NATS subject to send to
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="subject-expression" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Expression for NATS subject to send to
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="template" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Bean name of the org.kasource.spring.nats.NatsTemplateImpl to use. Will be looked up in the
+                        ApplicationContext if not set.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="requires-reply" type="xsd:boolean" default="false">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Is a reply required?
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="async" type="xsd:boolean" default="false">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Enable Async messaging.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

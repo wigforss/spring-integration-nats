@@ -1,0 +1,1 @@
+http\://kasource.org/schema/spring-integration-nats=org.kasource.spring.nats.integration.config.xmlns.IntegrationNatsXmlNamespaceHandler

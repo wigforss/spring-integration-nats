@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:nats="http://kasource.org/schema/spring-nats"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:nats-int="http://kasource.org/schema/spring-integration-nats"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://kasource.org/schema/spring-nats
+                           http://kasource.org/schema/spring-nats.xsd
+                           http://kasource.org/schema/spring-integration-nats
+                           http://kasource.org/schema/spring-integration-nats.xsd
+                           http://www.springframework.org/schema/integration
+                           http://www.springframework.org/schema/integration/spring-integration.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder/>
+    <!-- Spring NATS -->
+    <nats:jackson  connection-url="nats://localhost:${NATS_PORT}"/>
+    <bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
+
+
+    <int:channel id="personRequestChannel"/>
+    <int:channel id="personResponseChannel"/>
+    <int:channel id="myErrorChannel"/>
+
+    <int:logging-channel-adapter channel="myErrorChannel" level="ERROR" log-full-message="true"/>
+
+    <nats-int:inbound-gateway request-channel="personRequestChannel"
+                              request-payload-type="org.kasource.spring.nats.integration.integration.Person"
+                              reply-channel="personResponseChannel"
+                              error-channel="errorChannel"
+                              request-timeout="-1"
+                              subject="person-in-subject"/>
+
+
+
+    <nats-int:outbound-gateway request-channel="personRequestChannel"
+                               reply-channel="personResponseChannel"
+                               reply-payload-type="org.kasource.spring.nats.integration.integration.Person"
+                               subject="person-subject"
+                               request-timeout="-1"
+                               requires-reply="true"/>
+
+    <bean id="personService" class="org.kasource.spring.nats.integration.integration.PersonService"/>
+    <bean id="mockNatsService" class="org.kasource.spring.nats.integration.integration.ExternalNatsPersonServiceMock">
+        <property name="personService" ref="personService"/>
+        <property name="template" ref="#{T(org.kasource.spring.nats.config.NatsBeans).NATS_TEMPLATE}"/>
+    </bean>
+
+
+</beans>

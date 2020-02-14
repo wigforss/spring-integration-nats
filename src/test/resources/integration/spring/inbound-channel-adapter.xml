@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:nats="http://kasource.org/schema/spring-nats"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:nats-int="http://kasource.org/schema/spring-integration-nats"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://kasource.org/schema/spring-nats http://kasource.org/schema/spring-nats.xsd
+                           http://kasource.org/schema/spring-integration-nats http://kasource.org/schema/spring-integration-nats.xsd
+                           http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder/>
+
+    <nats:jackson  connection-url="nats://localhost:${NATS_PORT}"/>
+
+    <bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
+
+    <int:channel id="personChannel"/>
+    <bean id="personListener" class="org.kasource.spring.nats.integration.integration.SpringMessageListener"/>
+
+    <int:outbound-channel-adapter ref="personListener" channel="personChannel"/>
+
+    <nats-int:inbound-channel-adapter channel="personChannel"
+                                      request-payload-type="org.kasource.spring.nats.integration.integration.Person"
+                                      subject="person-subject"/>
+
+
+</beans>
